@@ -16,8 +16,10 @@ import {
   Tag
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
   const {
@@ -36,6 +38,8 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const router = useRouter();
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,13 +289,19 @@ export default function CartPage() {
               </div>
             </div>
 
-            <Link
-              href="/checkout"
+            <button
+              onClick={() => {
+                if (!user) {
+                  router.push('/login?redirect=/checkout');
+                } else {
+                  router.push('/checkout');
+                }
+              }}
               className="w-full py-4 bg-[#826530] hover:bg-[#684f23] text-white rounded-xl text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-royal"
             >
               <span>Proceed to Checkout</span>
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
 
             <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-stone-500">
               <span className="flex items-center gap-1">

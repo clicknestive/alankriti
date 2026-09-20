@@ -3,13 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight, Sparkles } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/lib/utils';
 
 export default function CartDrawer() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
   const {
     items,
     itemCount,
@@ -209,14 +212,20 @@ export default function CartDrawer() {
               >
                 View Full Bag
               </Link>
-              <Link
-                href="/checkout"
-                onClick={() => setIsCartOpen(false)}
+              <button
+                onClick={() => {
+                  setIsCartOpen(false);
+                  if (!user) {
+                    router.push('/login?redirect=/checkout');
+                  } else {
+                    router.push('/checkout');
+                  }
+                }}
                 className="flex items-center justify-center gap-1.5 py-2.5 bg-[#5E7052] hover:bg-[#43513B] text-white rounded-xl text-xs font-semibold tracking-wider uppercase transition-colors shadow-sm"
               >
                 <span>Checkout</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              </button>
             </div>
           </div>
         )}

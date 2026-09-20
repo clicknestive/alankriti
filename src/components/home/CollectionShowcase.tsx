@@ -90,8 +90,6 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
           </h2>
           <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-2xl">
             Explore our 5 signature collections: Pure Silk, Semi Crepe, Organza, Cotton Handloom &amp; Georgette.
-            Exquisite designs with prices starting from{' '}
-            <strong className="text-[#826530] font-semibold">₹1,500 to ₹3,500</strong>.
           </p>
         </div>
 
@@ -255,17 +253,12 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
                     </h4>
                   </Link>
 
-                  {/* Saree Specific Details (Dimensions, Blouse) */}
-                  <div className="mt-2 pt-2 border-t border-stone-100 space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-stone-500">
-                      <span>Length:</span>
-                      <span className="font-medium text-[#2A3425]">{product.sareeLength}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-stone-500">
-                      <span>Blouse Piece:</span>
-                      <span className="font-medium text-[#5E7052]">Included (0.8m)</span>
-                    </div>
-                  </div>
+                  {/* Product Description */}
+                  {product.description && (
+                    <p className="mt-2 pt-2 border-t border-stone-100 text-[11px] text-stone-500 leading-relaxed line-clamp-2">
+                      {product.description}
+                    </p>
+                  )}
                 </div>
 
                 {/* Price & Add to Cart */}

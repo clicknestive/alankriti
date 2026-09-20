@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProductImage {
   id?: string;
@@ -17,19 +17,10 @@ interface ProductGalleryProps {
 
 export default function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
 
   const activeImage = images[selectedIndex] || {
     url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80',
     alt: productName,
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomPosition({ x, y });
   };
 
   const handlePrev = () => {
@@ -66,37 +57,17 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
         </div>
       )}
 
-      {/* Main Large Display with Interactive Zoom */}
+      {/* Main Large Display */}
       <div className="relative flex-1 aspect-[3/4] max-h-[620px] rounded-2xl overflow-hidden border border-[#E3DCCF] bg-[#F8F1E7] shadow-sm">
-        <div
-          className="relative w-full h-full cursor-crosshair overflow-hidden"
-          onMouseEnter={() => setIsZoomed(true)}
-          onMouseLeave={() => setIsZoomed(false)}
-          onMouseMove={handleMouseMove}
-        >
+        <div className="relative w-full h-full">
           <Image
             src={activeImage.url}
             alt={activeImage.alt || productName}
             fill
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
-            className={`object-cover object-top transition-transform duration-200 ${
-              isZoomed ? 'scale-150' : 'scale-100'
-            }`}
-            style={
-              isZoomed
-                ? {
-                    transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                  }
-                : undefined
-            }
+            className="object-cover object-top"
           />
-        </div>
-
-        {/* Zoom Hint Badge */}
-        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white text-[11px] px-3 py-1.5 rounded-full flex items-center gap-1.5 pointer-events-none">
-          <ZoomIn className="w-3.5 h-3.5 text-[#C6A15B]" />
-          <span>Hover to inspect weave</span>
         </div>
 
         {/* Carousel Prev / Next Buttons */}

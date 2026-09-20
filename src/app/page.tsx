@@ -52,7 +52,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-20 pb-20 overflow-hidden">
       {/* 1. HERO SECTION (CREAM LUXURY) */}
-      <section className="relative min-h-[80vh] flex items-center justify-center bg-[#F8F1E7] text-[#2A3425] overflow-hidden border-b border-[#E3DCCF]">
+      <section className="relative flex items-center justify-center bg-[#F8F1E7] text-[#2A3425] overflow-hidden border-b border-[#E3DCCF]">
         {/* Subtle Luxury Pattern / Silk Texture Overlay */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -66,21 +66,8 @@ export default async function HomePage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center space-y-8">
-          {/* Subtle Logo Emblem */}
-          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/85 backdrop-blur-md border border-[#C6A15B]/50 shadow-sm animate-fadeIn">
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#C6A15B] bg-white">
-              <Image
-                src="/images/logo.png"
-                alt="Alankriti Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-xs uppercase tracking-[0.25em] text-[#826530] font-semibold">
-              Alankriti Couture Privé
-            </span>
-          </div>
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10 text-center space-y-6">
+
 
           {/* Main Heading */}
           <div className="space-y-4">
@@ -93,23 +80,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link
-              href="/shop"
-              className="w-full sm:w-auto px-8 py-4 bg-[#826530] hover:bg-[#684f23] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all duration-300 shadow-md hover:shadow-royal hover:scale-105 flex items-center justify-center gap-2"
-            >
-              <span>Shop Sarees</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
 
-            <Link
-              href="/collections"
-              className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-[#FAF6F0] text-[#2A3425] border border-[#BDCFB1] font-semibold text-xs uppercase tracking-[0.2em] rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center gap-2"
-            >
-              <span>Explore Collection</span>
-            </Link>
-          </div>
 
           {/* Supporting Tagline Ribbon */}
           <div className="pt-6 flex items-center justify-center gap-4 text-xs tracking-widest uppercase text-[#826530]">
