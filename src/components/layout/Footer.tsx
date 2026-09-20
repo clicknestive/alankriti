@@ -152,7 +152,7 @@ export default function Footer() {
         {/* Col 4: Boutique Concierge */}
         <div className="space-y-3">
           <h4 className="font-serif text-lg font-semibold text-[#E7D3AC] tracking-wide border-b border-[#C6A15B]/30 pb-2">
-            Boutique Concierge
+            Alankriti Concierge
           </h4>
           <p className="text-xs text-[#BDCFB1] leading-relaxed">
             Our bridal and handloom consultants are available for personalized private drape consultations.

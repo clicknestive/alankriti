@@ -100,7 +100,7 @@ function ShopContent() {
             Alankriti Atelier
           </span>
           <h1 className="font-serif text-3xl sm:text-5xl font-bold">
-            {isWishlistTab ? 'Your Bespoke Wishlist' : 'Boutique Saree Gallery'}
+            {isWishlistTab ? 'Your Bespoke Wishlist' : 'Alankriti Saree Gallery'}
           </h1>
           <p className="text-xs sm:text-sm text-[#BDCFB1] leading-relaxed">
             {isWishlistTab
