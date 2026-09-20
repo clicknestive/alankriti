@@ -283,14 +283,14 @@ export default function StepAddress({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 px-5 py-3 border border-[#BDCFB1] hover:bg-[#E6EFE2] text-[#2A3425] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors"
+          className="flex items-center gap-2 px-5 py-3 border border-[#BDCFB1] hover:bg-[#E6EFE2] active:scale-95 text-[#2A3425] rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
         </button>
         <button
           type="submit"
-          className="flex items-center gap-2 px-6 py-3 bg-[#5E7052] hover:bg-[#43513B] text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+          className="flex items-center gap-2 px-6 py-3 bg-[#5E7052] hover:bg-[#43513B] active:scale-95 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 shadow-sm cursor-pointer"
         >
           <span>Continue to Order Summary</span>
           <ArrowRight className="w-4 h-4" />

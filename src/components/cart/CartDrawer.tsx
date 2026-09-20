@@ -13,6 +13,13 @@ export default function CartDrawer() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const [navigating, setNavigating] = React.useState(false);
+
+  React.useEffect(() => {
+    router.prefetch('/checkout');
+    router.prefetch('/login?redirect=/checkout');
+    router.prefetch('/cart');
+  }, [router]);
   const {
     items,
     itemCount,
@@ -213,18 +220,18 @@ export default function CartDrawer() {
                 View Full Bag
               </Link>
               <button
+                type="button"
+                disabled={navigating}
                 onClick={() => {
+                  setNavigating(true);
                   setIsCartOpen(false);
-                  if (!user) {
-                    router.push('/login?redirect=/checkout');
-                  } else {
-                    router.push('/checkout');
-                  }
+                  const target = !user ? '/login?redirect=/checkout' : '/checkout';
+                  router.push(target);
                 }}
-                className="flex items-center justify-center gap-1.5 py-2.5 bg-[#5E7052] hover:bg-[#43513B] text-white rounded-xl text-xs font-semibold tracking-wider uppercase transition-colors shadow-sm"
+                className="flex items-center justify-center gap-1.5 py-2.5 bg-[#5E7052] active:scale-95 hover:bg-[#43513B] text-white rounded-xl text-xs font-semibold tracking-wider uppercase transition-all duration-150 shadow-sm disabled:opacity-75 cursor-pointer"
               >
-                <span>Checkout</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>{navigating ? 'Opening...' : 'Checkout'}</span>
+                <ArrowRight className={`w-3.5 h-3.5 ${navigating ? 'animate-pulse' : ''}`} />
               </button>
             </div>
           </div>

@@ -427,7 +427,7 @@ export default function StepPayment({
           type="button"
           onClick={handlePay}
           disabled={isProcessing || localProcessing}
-          className="flex items-center gap-2 px-8 py-3.5 bg-[#826530] hover:bg-[#684f23] text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-md hover:shadow-royal disabled:opacity-50"
+          className="flex items-center gap-2 px-8 py-3.5 bg-[#826530] hover:bg-[#684f23] active:scale-95 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-150 shadow-md hover:shadow-royal disabled:opacity-50 cursor-pointer"
         >
           {isProcessing || localProcessing ? (
             <span className="flex items-center gap-2">

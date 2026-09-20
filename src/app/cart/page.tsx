@@ -40,6 +40,12 @@ export default function CartPage() {
   const { showToast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
+  const [navigating, setNavigating] = useState(false);
+
+  React.useEffect(() => {
+    router.prefetch('/checkout');
+    router.prefetch('/login?redirect=/checkout');
+  }, [router]);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,17 +296,17 @@ export default function CartPage() {
             </div>
 
             <button
+              type="button"
+              disabled={navigating}
               onClick={() => {
-                if (!user) {
-                  router.push('/login?redirect=/checkout');
-                } else {
-                  router.push('/checkout');
-                }
+                setNavigating(true);
+                const target = !user ? '/login?redirect=/checkout' : '/checkout';
+                router.push(target);
               }}
-              className="w-full py-4 bg-[#826530] hover:bg-[#684f23] text-white rounded-xl text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-royal"
+              className="w-full py-4 bg-[#826530] active:scale-[0.98] hover:bg-[#684f23] text-white rounded-xl text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all duration-150 shadow-md hover:shadow-royal disabled:opacity-75 cursor-pointer"
             >
-              <span>Proceed to Checkout</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>{navigating ? 'Navigating...' : 'Proceed to Checkout'}</span>
+              <ArrowRight className={`w-4 h-4 ${navigating ? 'animate-pulse' : ''}`} />
             </button>
 
             <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-stone-500">

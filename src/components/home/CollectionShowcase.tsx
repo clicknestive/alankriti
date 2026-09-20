@@ -274,6 +274,7 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
                   </div>
 
                   <button
+                    type="button"
                     onClick={() =>
                       addToCart({
                         id: product.id,
@@ -286,7 +287,7 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
                         stock: product.stock,
                       })
                     }
-                    className="p-2.5 rounded-xl bg-[#FAF6F0] hover:bg-[#826530] text-[#2A3425] hover:text-white transition-all shadow-sm"
+                    className="p-2.5 rounded-xl bg-[#FAF6F0] hover:bg-[#826530] active:bg-[#684f23] active:scale-90 text-[#2A3425] hover:text-white active:text-white transition-all duration-100 shadow-sm cursor-pointer"
                     title="Add to Shopping Bag"
                     aria-label="Add to cart"
                   >

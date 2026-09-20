@@ -88,7 +88,7 @@ export default function StepDetails({ formData, setFormData, onNext }: StepDetai
       <div className="flex justify-end pt-4">
         <button
           type="submit"
-          className="flex items-center gap-2 px-6 py-3 bg-[#5E7052] hover:bg-[#43513B] text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+          className="flex items-center gap-2 px-6 py-3 bg-[#5E7052] hover:bg-[#43513B] active:scale-95 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 shadow-sm cursor-pointer"
         >
           <span>Continue to Shipping Address</span>
           <ArrowRight className="w-4 h-4" />

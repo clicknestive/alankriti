@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Heart, Plus, Minus, ArrowRight, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
 
 interface ProductActionsProps {
@@ -23,9 +24,16 @@ interface ProductActionsProps {
 
 export default function ProductActions({ product }: ProductActionsProps) {
   const [quantity, setQuantity] = useState(1);
+  const [isBuying, setIsBuying] = useState(false);
   const { addToCart, setIsCartOpen } = useCart();
+  const { user } = useAuth();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch('/checkout');
+    router.prefetch('/login?redirect=/checkout');
+  }, [router]);
 
   const isFavorited = isInWishlist(product.id);
 
@@ -38,9 +46,11 @@ export default function ProductActions({ product }: ProductActionsProps) {
   };
 
   const handleBuyNow = () => {
-    if (product.stock <= 0) return;
+    if (product.stock <= 0 || isBuying) return;
+    setIsBuying(true);
     addToCart(product, quantity);
-    router.push('/checkout');
+    const target = !user ? '/login?redirect=/checkout' : '/checkout';
+    router.push(target);
   };
 
   return (
@@ -78,26 +88,29 @@ export default function ProductActions({ product }: ProductActionsProps) {
       {/* Main Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button
+          type="button"
           onClick={handleAddToCart}
           disabled={product.stock <= 0}
-          className="w-full py-3.5 px-4 bg-[#E6EFE2] hover:bg-[#A8B89A]/50 text-[#2A3425] rounded-xl text-xs font-bold uppercase tracking-widest border border-[#BDCFB1] flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-40"
+          className="w-full py-3.5 px-4 bg-[#E6EFE2] hover:bg-[#A8B89A]/50 active:scale-95 text-[#2A3425] rounded-xl text-xs font-bold uppercase tracking-widest border border-[#BDCFB1] flex items-center justify-center gap-2 transition-all duration-150 shadow-sm disabled:opacity-40 cursor-pointer"
         >
           <ShoppingBag className="w-4 h-4" />
           <span>Add to Bag</span>
         </button>
 
         <button
+          type="button"
           onClick={handleBuyNow}
-          disabled={product.stock <= 0}
-          className="w-full py-3.5 px-4 bg-[#826530] hover:bg-[#684f23] text-white rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-royal disabled:opacity-40"
+          disabled={product.stock <= 0 || isBuying}
+          className="w-full py-3.5 px-4 bg-[#826530] hover:bg-[#684f23] active:scale-95 text-white rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all duration-150 shadow-md hover:shadow-royal disabled:opacity-75 cursor-pointer"
         >
-          <span>Buy Now</span>
-          <ArrowRight className="w-4 h-4" />
+          <span>{isBuying ? 'Proceeding...' : 'Buy Now'}</span>
+          <ArrowRight className={`w-4 h-4 ${isBuying ? 'animate-pulse' : ''}`} />
         </button>
       </div>
 
       {/* Wishlist Button */}
       <button
+        type="button"
         onClick={() =>
           toggleWishlist({
             id: product.id,
@@ -110,7 +123,7 @@ export default function ProductActions({ product }: ProductActionsProps) {
             fabric: product.fabric,
           })
         }
-        className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all ${
+        className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all duration-150 active:scale-98 cursor-pointer ${
           isFavorited
             ? 'bg-rose-50 text-rose-700 border-rose-200'
             : 'bg-white text-stone-700 border-[#E3DCCF] hover:border-[#C6A15B]'
