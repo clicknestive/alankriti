@@ -51,7 +51,7 @@ function AdminSidebarContent({ pathname, onClose }: { pathname: string; onClose?
             Alankriti
           </div>
           <div className="text-[#FAF6F0] font-light text-xs tracking-widest mt-0.5">
-            Admin Console
+            Admin Panel
           </div>
         </div>
       </div>

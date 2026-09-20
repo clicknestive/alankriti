@@ -3,7 +3,7 @@ import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { AdminLayoutClient } from "./AdminLayoutClient";
 
 export const metadata: Metadata = {
-  title: "Admin Console | Alankriti Couture",
+  title: "Admin Panel | Alankriti Couture",
   robots: "noindex, nofollow",
 };
 
