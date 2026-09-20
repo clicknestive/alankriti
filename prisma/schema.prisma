@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  mobile        String?
+  profilePhoto  String?
+  role          String    @default("CUSTOMER") // "CUSTOMER" or "ADMIN"
+  isBlocked     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  payments      Payment[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  userId      String
+  fullName    String
+  phone       String
+  street      String
+  landmark    String?
+  city        String
+  state       String
+  pincode     String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+}
+
+model Product {
+  id                String         @id @default(uuid())
+  name              String
+  slug              String         @unique
+  sku               String         @unique
+  description       String
+  price             Float
+  originalPrice     Float?
+  discount          Int            @default(0)
+  stock             Int            @default(10)
+  fabric            String
+  colour            String
+  occasion          String
+  sareeLength       String         @default("5.5 metres")
+  blouseDetails     String         @default("0.8 metre unstitched matching blouse piece")
+  careInstructions  String         @default("Dry clean only to maintain zari lustre and silk softness")
+  isFeatured        Boolean        @default(false)
+  isActive          Boolean        @default(true)
+  categoryId        String
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  category          Category       @relation(fields: [categoryId], references: [id])
+  images            ProductImage[]
+  orderItems        OrderItem[]
+  reviews           Review[]
+  wishlists         Wishlist[]
+}
+
+model ProductImage {
+  id          String   @id @default(uuid())
+  productId   String
+  url         String
+  alt         String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id                      String      @id // Custom format e.g. ALC-2026-000001
+  userId                  String
+  totalAmount             Float
+  discountAmount          Float       @default(0)
+  shippingAmount          Float       @default(0)
+  paymentStatus           String      @default("PENDING") // PENDING, PAID, FAILED, CANCELLED, REFUNDED
+  orderStatus             String      @default("ORDER PLACED") // ORDER PLACED, PAYMENT CONFIRMED, PROCESSING, PACKED, SHIPPED, OUT FOR DELIVERY, DELIVERED, CANCELLED, RETURN REQUESTED, RETURNED, REFUNDED
+  paymentMethod           String      @default("RAZORPAY")
+  razorpayOrderId         String?
+  razorpayPaymentId       String?
+  shippingAddressSnapshot String      // JSON string of address at order time
+  shippingCarrier         String?     // e.g. "BlueDart Express"
+  trackingNumber          String?     // e.g. "BD89271923IN"
+  customerNotes           String?
+  adminNotes              String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+
+  user                    User        @relation(fields: [userId], references: [id])
+  items                   OrderItem[]
+  payment                 Payment?
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  productId       String
+  productName     String
+  productSlug     String
+  productImage    String
+  fabric          String?
+  colour          String?
+  price           Float
+  quantity        Int
+  total           Float
+
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [productId], references: [id])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  productId   String
+  userId      String
+  rating      Int      // 1 to 5
+  comment     String
+  imageUrl    String?
+  isApproved  Boolean  @default(true)
+  isFlagged   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Wishlist {
+  id          String   @id @default(uuid())
+  userId      String
+  productId   String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String   // e.g. "PRODUCT_CREATED", "PRICE_CHANGED", "STOCK_CHANGED", "ORDER_STATUS_CHANGED", "CUSTOMER_BLOCKED", "REVIEW_APPROVED", "ADMIN_LOGIN"
+  entityType  String   // "Product", "Category", "Order", "User", "Review", "Auth"
+  entityId    String?
+  details     String   // Context / diff details
+  adminEmail  String
+  createdAt   DateTime @default(now())
+}
+
+model Payment {
+  id                String    @id @default(uuid())
+  paymentId         String?   @unique // Razorpay payment ID e.g. pay_XXXXX
+  razorpayOrderId   String    // Razorpay order ID e.g. order_XXXXX
+  razorpaySignature String?
+  amount            Float
+  currency          String    @default("INR")
+  status            String    @default("CREATED") // CREATED, AUTHORIZED, CAPTURED, FAILED, CANCELLED, REFUNDED
+  method            String?   // upi, card, netbanking, wallet, emi, etc.
+  errorDescription  String?
+  refundId          String?
+  refundAmount      Float?
+  refundStatus      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  userId            String
+  orderId           String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
