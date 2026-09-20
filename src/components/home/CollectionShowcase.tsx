@@ -21,6 +21,7 @@ export interface SareeItem {
   occasion: string;
   sareeLength: string;
   blouseDetails: string;
+  description?: string;
   isFeatured: boolean;
   category: {
     id: string;
