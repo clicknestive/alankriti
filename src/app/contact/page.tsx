@@ -70,7 +70,7 @@ export default function ContactPage() {
                 <Phone className="w-5 h-5 text-[#C6A15B] shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block mb-0.5">Concierge Phone / WhatsApp:</strong>
-                  <span>+91 (080) 4567 8900 / +91 98765 43210</span>
+                  <span>+91 63660 49905</span>
                 </div>
               </div>
 
@@ -78,7 +78,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 text-[#C6A15B] shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block mb-0.5">Email Inquiries:</strong>
-                  <span>concierge@alankriticouture.com</span>
+                  <span>alankrticouture@gmail.com</span>
                 </div>
               </div>
 
