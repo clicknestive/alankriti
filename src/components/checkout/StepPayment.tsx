@@ -161,15 +161,55 @@ export default function StepPayment({
         return;
       }
 
-      // Step B: Razorpay Modal
+      // Step B: Handle Simulated Test Gateway vs Real Razorpay SDK
+      if (orderData.isSimulated || orderData.id.startsWith('order_alc_')) {
+        try {
+          const verifyRes = await fetch('/api/payment/razorpay/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: orderData.id,
+              razorpay_payment_id: `pay_alc_sim_${Date.now()}`,
+              razorpay_signature: 'mock_signature_verified',
+              customerData,
+              addressData,
+              items,
+              totalAmount: total,
+              discountAmount: discount,
+              shippingAmount: shipping,
+              paymentMethod: 'RAZORPAY',
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          setLocalProcessing(false);
+          if (verifyRes.ok && verifyData.order) {
+            onPaymentSuccess({
+              paymentMethod: 'RAZORPAY',
+              paymentStatus: 'PAID',
+              razorpayOrderId: orderData.id,
+              razorpayPaymentId: verifyData.order.razorpayPaymentId || `pay_alc_sim_${Date.now()}`,
+              confirmedOrder: verifyData.order,
+            });
+          } else {
+            showToast(verifyData.error || 'Payment settlement failed', 'error');
+          }
+        } catch (simErr: any) {
+          setLocalProcessing(false);
+          showToast('Simulated checkout network issue.', 'error');
+        }
+        return;
+      }
+
+      // Step C: Real Razorpay Modal
       if (typeof window !== 'undefined' && (window as any).Razorpay) {
+        const logoUrl = typeof window !== 'undefined' ? `${window.location.origin}/images/logo.jpeg` : '';
         const options = {
           key: orderData.key_id,
           amount: orderData.amount,
           currency: orderData.currency || 'INR',
           name: 'Alankriti Couture',
           description: 'Payment for handcrafted saree curation',
-          image: '/images/logo.jpeg',
+          image: logoUrl,
           order_id: orderData.id,
           handler: async function (response: any) {
             // Step C: Backend verifies signature & saves order atomically

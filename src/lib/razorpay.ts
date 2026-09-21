@@ -1,17 +1,23 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ALANKRITI2026';
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'ALANKRITI_SECRET_KEY_2026';
-const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'ALANKRITI_WEBHOOK_SECRET_2026';
-
-export const razorpayClient = new Razorpay({
-  key_id: RAZORPAY_KEY_ID,
-  key_secret: RAZORPAY_KEY_SECRET,
-});
-
 export function getRazorpayKeyId(): string {
-  return RAZORPAY_KEY_ID;
+  return process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ALANKRITI2026';
+}
+
+export function getRazorpayKeySecret(): string {
+  return process.env.RAZORPAY_KEY_SECRET || 'ALANKRITI_SECRET_KEY_2026';
+}
+
+export function getRazorpayWebhookSecret(): string {
+  return process.env.RAZORPAY_WEBHOOK_SECRET || 'ALANKRITI_WEBHOOK_SECRET_2026';
+}
+
+export function getRazorpayClient(): Razorpay {
+  return new Razorpay({
+    key_id: getRazorpayKeyId(),
+    key_secret: getRazorpayKeySecret(),
+  });
 }
 
 export async function createRazorpayOrder({
@@ -23,6 +29,9 @@ export async function createRazorpayOrder({
   receipt: string;
   notes?: Record<string, string>;
 }) {
+  const keyId = getRazorpayKeyId();
+  const keySecret = getRazorpayKeySecret();
+
   const options = {
     amount: Math.round(amount * 100), // amount in smallest currency unit (paise)
     currency: 'INR',
@@ -31,33 +40,30 @@ export async function createRazorpayOrder({
   };
 
   // If test placeholder keys are detected, return simulated order structure
-  if (RAZORPAY_KEY_ID.includes('test_ALANKRITI')) {
+  if (keyId.includes('test_ALANKRITI') || keySecret.includes('SECRET_KEY_2026')) {
     return {
       id: `order_alc_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
       amount: options.amount,
       currency: 'INR',
       receipt: options.receipt,
       status: 'created',
-      key_id: RAZORPAY_KEY_ID,
+      key_id: keyId,
+      isSimulated: true,
     };
   }
 
   try {
-    const order = await razorpayClient.orders.create(options);
+    const client = getRazorpayClient();
+    const order = await client.orders.create(options);
     return {
       ...order,
-      key_id: RAZORPAY_KEY_ID,
+      key_id: keyId,
+      isSimulated: false,
     };
-  } catch (error) {
-    console.error('Razorpay live order error, falling back to test order:', error);
-    return {
-      id: `order_alc_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-      amount: options.amount,
-      currency: 'INR',
-      receipt: options.receipt,
-      status: 'created',
-      key_id: RAZORPAY_KEY_ID,
-    };
+  } catch (error: any) {
+    console.error('Razorpay live order creation error:', error);
+    const errorMsg = error?.error?.description || error?.description || error?.message || 'Razorpay order creation failed.';
+    throw new Error(errorMsg);
   }
 }
 
@@ -78,8 +84,9 @@ export function verifyRazorpaySignature({
   }
 
   try {
+    const keySecret = getRazorpayKeySecret();
     const generatedSignature = crypto
-      .createHmac('sha256', RAZORPAY_KEY_SECRET)
+      .createHmac('sha256', keySecret)
       .update(`${orderId}|${paymentId}`)
       .digest('hex');
     return generatedSignature === signature;
@@ -99,8 +106,9 @@ export function verifyWebhookSignature({
   if (!rawBody || !signature) return false;
 
   try {
+    const webhookSecret = getRazorpayWebhookSecret();
     const expectedSignature = crypto
-      .createHmac('sha256', RAZORPAY_WEBHOOK_SECRET)
+      .createHmac('sha256', webhookSecret)
       .update(rawBody)
       .digest('hex');
     return expectedSignature === signature;
@@ -119,6 +127,7 @@ export async function createRazorpayRefund({
   amount?: number; // in INR
   notes?: Record<string, string>;
 }) {
+  const keyId = getRazorpayKeyId();
   const refundOptions: any = {
     notes: notes || {},
   };
@@ -130,8 +139,9 @@ export async function createRazorpayRefund({
   if (
     paymentId.startsWith('pay_mock_') ||
     paymentId.startsWith('rzp_pay_') ||
+    paymentId.startsWith('pay_alc_') ||
     paymentId.startsWith('demo_') ||
-    RAZORPAY_KEY_ID.includes('test_ALANKRITI')
+    keyId.includes('test_ALANKRITI')
   ) {
     return {
       id: `rfnd_alc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -144,7 +154,8 @@ export async function createRazorpayRefund({
   }
 
   try {
-    const refund = await (razorpayClient.payments as any).refund(paymentId, refundOptions);
+    const client = getRazorpayClient();
+    const refund = await (client.payments as any).refund(paymentId, refundOptions);
     return refund;
   } catch (error) {
     console.error('Razorpay live refund error, generating simulated response:', error);
