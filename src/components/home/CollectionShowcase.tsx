@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, ArrowRight, Heart, ShoppingBag, Eye, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight, Heart, ShoppingBag, Eye, CheckCircle2, Minus, Plus } from 'lucide-react';
 import { formatPrice, parseProductImages } from '@/lib/utils';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
@@ -53,7 +53,7 @@ interface CollectionShowcaseProps {
 export default function CollectionShowcase({ categories }: CollectionShowcaseProps) {
   const [activeSlug, setActiveSlug] = useState<string>('all');
   const { isInWishlist, toggleWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const { items, addToCart, updateQuantity } = useCart();
 
   const allProducts: SareeItem[] = categories
     .flatMap((cat) =>
@@ -167,7 +167,7 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
       )}
 
       {/* 4 Sarees in One Row Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
         {displayedProducts.map((product) => {
           const isFavorited = isInWishlist(product.id);
           const parsedImgs = parseProductImages(product.images);
@@ -263,7 +263,7 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
                 </div>
 
                 {/* Price & Add to Cart */}
-                <div className="mt-auto pt-3 border-t border-[#FAF6F0] flex items-center justify-between">
+                <div className="mt-auto pt-3 border-t border-[#FAF6F0] flex items-center justify-between gap-2">
                   <div>
                     <span className="text-lg font-bold text-[#2A3425]">
                       {formatPrice(product.price)}
@@ -273,26 +273,63 @@ export default function CollectionShowcase({ categories }: CollectionShowcasePro
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      addToCart({
-                        id: product.id,
-                        name: product.name,
-                        slug: product.slug,
-                        price: product.price,
-                        image: firstImage,
-                        fabric: product.fabric,
-                        colour: product.colour,
-                        stock: product.stock,
-                      })
+                  {(() => {
+                    const cartItem = items.find((i) => i.productId === product.id);
+                    const quantity = cartItem ? cartItem.quantity : 0;
+
+                    if (quantity === 0) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addToCart({
+                              id: product.id,
+                              name: product.name,
+                              slug: product.slug,
+                              price: product.price,
+                              image: firstImage,
+                              fabric: product.fabric,
+                              colour: product.colour,
+                              stock: product.stock,
+                            })
+                          }
+                          className="px-3 py-2 rounded-xl bg-[#FAF6F0] hover:bg-[#826530] text-[#2A3425] hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                          title="Add to Shopping Bag"
+                          aria-label="Add to Shopping Bag"
+                        >
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                          <span>Add to Bag</span>
+                        </button>
+                      );
                     }
-                    className="p-2.5 rounded-xl bg-[#FAF6F0] hover:bg-[#826530] active:bg-[#684f23] active:scale-90 text-[#2A3425] hover:text-white active:text-white transition-all duration-100 shadow-sm cursor-pointer"
-                    title="Add to Shopping Bag"
-                    aria-label="Add to cart"
-                  >
-                    <ShoppingBag className="w-4 h-4" />
-                  </button>
+
+                    return (
+                      <div className="inline-flex items-center rounded-xl border border-[#BDCFB1] bg-[#FAF6F0] p-1 shadow-sm gap-1">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-[#2A3425] hover:bg-[#826530] hover:text-white transition-colors text-xs font-bold active:scale-90 cursor-pointer"
+                          aria-label="Decrease quantity"
+                          title="Decrease quantity"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-6 text-center text-xs font-bold text-[#2A3425] select-none">
+                          {quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(product.id, quantity + 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-[#2A3425] hover:bg-[#826530] hover:text-white transition-colors text-xs font-bold disabled:opacity-40 active:scale-90 cursor-pointer"
+                          disabled={quantity >= product.stock}
+                          aria-label="Increase quantity"
+                          title="Increase quantity"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

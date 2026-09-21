@@ -50,9 +50,9 @@ export default async function HomePage() {
   const { categories, reviews } = await getHomeData();
 
   return (
-    <div className="space-y-20 pb-20 overflow-hidden">
+    <div className="space-y-20 pb-20 overflow-hidden bg-[#FAF6F0]">
       {/* 1. HERO SECTION (CREAM LUXURY) */}
-      <section className="relative flex items-center justify-center bg-[#F8F1E7] text-[#2A3425] overflow-hidden border-b border-[#E3DCCF]">
+      <section className="relative flex items-center justify-center bg-[#FAF6F0] text-[#2A3425] overflow-hidden border-b border-[#E3DCCF]">
         {/* Subtle Luxury Pattern / Silk Texture Overlay */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -60,9 +60,9 @@ export default async function HomePage() {
             alt="Alankriti Couture Sarees"
             fill
             priority
-            className="object-cover object-center opacity-15 scale-105 transition-transform duration-1000 ease-out"
+            className="object-cover object-center opacity-10 scale-105 transition-transform duration-1000 ease-out"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#F8F1E7]/90 via-[#FAF6F0]/80 to-[#F8F1E7]" />
+          <div className="absolute inset-0 bg-[#FAF6F0]/90" />
         </div>
 
         {/* Hero Content */}

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, ShoppingBag, Eye, Sparkles } from 'lucide-react';
+import { Heart, ShoppingBag, Eye, Sparkles, Minus, Plus } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
@@ -38,9 +38,11 @@ export default function ProductCard({
   isFeatured,
 }: ProductCardProps) {
   const { isInWishlist, toggleWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const { items, addToCart, updateQuantity } = useCart();
 
   const isFavorited = isInWishlist(id);
+  const cartItem = items.find((item) => item.productId === id);
+  const quantity = cartItem ? cartItem.quantity : 0;
 
   return (
     <div className="group relative bg-white rounded-2xl overflow-hidden border border-[#E3DCCF] hover:border-[#C6A15B] transition-all duration-300 hover:shadow-royal flex flex-col">
@@ -108,60 +110,89 @@ export default function ProductCard({
       </Link>
 
       {/* Content */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
+      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between text-[11px] text-[#826530] font-medium uppercase tracking-wider mb-1">
-            <span>{categoryName}</span>
-            <span className="text-stone-400 normal-case">{colour}</span>
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#826530] font-medium uppercase tracking-wider mb-1">
+            <span className="truncate max-w-[90px]">{categoryName}</span>
+            <span className="text-stone-400 normal-case truncate max-w-[70px]">{colour}</span>
           </div>
 
           <Link href={`/product/${slug}`}>
-            <h3 className="font-serif text-base font-semibold text-[#2A3425] hover:text-[#826530] transition-colors line-clamp-2 leading-snug">
+            <h3 className="font-serif text-xs sm:text-base font-semibold text-[#2A3425] hover:text-[#826530] transition-colors line-clamp-2 leading-snug">
               {name}
             </h3>
           </Link>
 
-          <p className="text-xs text-stone-500 mt-1 line-clamp-1">
+          <p className="text-[11px] sm:text-xs text-stone-500 mt-1 line-clamp-1">
             {fabric}
           </p>
         </div>
 
         {/* Price & Action */}
-        <div className="mt-4 pt-3 border-t border-[#FAF6F0] flex items-center justify-between">
+        <div className="mt-3 pt-2.5 border-t border-[#FAF6F0] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-base font-bold text-[#2A3425]">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-sm sm:text-base font-bold text-[#2A3425]">
                 {formatPrice(price)}
               </span>
               {originalPrice && originalPrice > price && (
-                <span className="text-xs text-stone-400 line-through">
+                <span className="text-[10px] sm:text-xs text-stone-400 line-through">
                   {formatPrice(originalPrice)}
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-[#5E7052] font-medium">Free Bespoke Stitching</p>
+            <p className="text-[9px] sm:text-[10px] text-[#5E7052] font-medium">Free Bespoke Stitching</p>
           </div>
 
-          <button
-            onClick={() =>
-              addToCart({
-                id,
-                name,
-                slug,
-                price,
-                originalPrice,
-                image: imageUrl,
-                fabric,
-                colour,
-                stock,
-              })
-            }
-            className="p-2 rounded-xl bg-[#E6EFE2] hover:bg-[#5E7052] text-[#2A3425] hover:text-white transition-colors"
-            title="Add to Shopping Bag"
-            aria-label="Add to cart"
-          >
-            <ShoppingBag className="w-4 h-4" />
-          </button>
+          {quantity === 0 ? (
+            <button
+              type="button"
+              onClick={() =>
+                addToCart({
+                  id,
+                  name,
+                  slug,
+                  price,
+                  originalPrice,
+                  image: imageUrl,
+                  fabric,
+                  colour,
+                  stock,
+                })
+              }
+              className="w-full sm:w-auto px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#E6EFE2] hover:bg-[#5E7052] text-[#2A3425] hover:text-white transition-all text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 shadow-sm active:scale-95 cursor-pointer"
+              title="Add to Shopping Bag"
+              aria-label="Add to Shopping Bag"
+            >
+              <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+              <span>Add to Bag</span>
+            </button>
+          ) : (
+            <div className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-[#BDCFB1] bg-[#FAF6F0] p-1 shadow-sm gap-1">
+              <button
+                type="button"
+                onClick={() => updateQuantity(id, quantity - 1)}
+                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg bg-white text-[#2A3425] hover:bg-[#826530] hover:text-white transition-colors text-xs font-bold active:scale-90 cursor-pointer"
+                aria-label="Decrease quantity"
+                title="Decrease quantity"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className="w-5 text-center text-xs font-bold text-[#2A3425] select-none">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => updateQuantity(id, quantity + 1)}
+                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg bg-white text-[#2A3425] hover:bg-[#826530] hover:text-white transition-colors text-xs font-bold disabled:opacity-40 active:scale-90 cursor-pointer"
+                disabled={quantity >= stock}
+                aria-label="Increase quantity"
+                title="Increase quantity"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CreditCard, ShieldCheck, ArrowLeft, Lock, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { CreditCard, Lock, ArrowLeft, RefreshCw, ShieldCheck } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
 
@@ -38,7 +38,6 @@ export default function StepPayment({
   onBack,
   isProcessing,
 }: StepPaymentProps) {
-  const [selectedMethod, setSelectedMethod] = useState<'RAZORPAY' | 'DEMO_INSTANT' | 'COD'>('RAZORPAY');
   const [localProcessing, setLocalProcessing] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const { showToast } = useToast();
@@ -55,7 +54,7 @@ export default function StepPayment({
       script.async = true;
       script.onload = () => setScriptLoaded(true);
       script.onerror = () => {
-        console.warn('Razorpay checkout script failed to load from CDN. Fallback simulation available.');
+        console.warn('Razorpay checkout script failed to load from CDN.');
         setScriptLoaded(false);
       };
       document.body.appendChild(script);
@@ -65,83 +64,7 @@ export default function StepPayment({
   const handlePay = async () => {
     setLocalProcessing(true);
 
-    // 1. Instant Demo 1-Click Mode
-    if (selectedMethod === 'DEMO_INSTANT') {
-      try {
-        const res = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerData,
-            addressData,
-            items,
-            totalAmount: total,
-            discountAmount: discount,
-            shippingAmount: shipping,
-            paymentMethod: 'DEMO_INSTANT',
-            paymentStatus: 'PAID',
-            razorpayOrderId: `ord_demo_${Date.now()}`,
-            razorpayPaymentId: `pay_demo_${Date.now()}`,
-          }),
-        });
-        const data = await res.json();
-        setLocalProcessing(false);
-
-        if (res.ok && data.order) {
-          onPaymentSuccess({
-            paymentMethod: 'DEMO_INSTANT',
-            paymentStatus: 'PAID',
-            razorpayOrderId: data.order.razorpayOrderId,
-            razorpayPaymentId: data.order.razorpayPaymentId,
-            confirmedOrder: data.order,
-          });
-        } else {
-          showToast(data.error || 'Failed to place demo order', 'error');
-        }
-      } catch (err: any) {
-        setLocalProcessing(false);
-        showToast('Network error during demo placement', 'error');
-      }
-      return;
-    }
-
-    // 2. Cash on Delivery Mode
-    if (selectedMethod === 'COD') {
-      try {
-        const res = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerData,
-            addressData,
-            items,
-            totalAmount: total,
-            discountAmount: discount,
-            shippingAmount: shipping,
-            paymentMethod: 'CASH_ON_DELIVERY',
-            paymentStatus: 'PENDING',
-          }),
-        });
-        const data = await res.json();
-        setLocalProcessing(false);
-
-        if (res.ok && data.order) {
-          onPaymentSuccess({
-            paymentMethod: 'CASH_ON_DELIVERY',
-            paymentStatus: 'PENDING',
-            confirmedOrder: data.order,
-          });
-        } else {
-          showToast(data.error || 'Failed to place COD order', 'error');
-        }
-      } catch (err: any) {
-        setLocalProcessing(false);
-        showToast('Network error during order placement', 'error');
-      }
-      return;
-    }
-
-    // 3. Official Razorpay Flow
+    // Official Razorpay Flow
     try {
       // Step A: Backend creates Razorpay order with Stock Verification (Overselling Prevention)
       const res = await fetch('/api/payment/razorpay/create-order', {
@@ -262,7 +185,6 @@ export default function StepPayment({
             ondismiss: async function () {
               setLocalProcessing(false);
               showToast('Payment window closed. Your selection remains in your bag.', 'info');
-              // Record cancellation
               await fetch('/api/payment/razorpay/record-failure', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -279,7 +201,6 @@ export default function StepPayment({
 
         const rzp = new (window as any).Razorpay(options);
 
-        // Handle payment failure event
         rzp.on('payment.failed', async function (response: any) {
           setLocalProcessing(false);
           const reason = response.error?.description || 'Transaction declined by issuer';
@@ -300,7 +221,6 @@ export default function StepPayment({
 
         rzp.open();
       } else {
-        // Fallback for headless testing environment without external CDN
         showToast('Razorpay Gateway active (Auto-verifying transaction...)', 'info');
         const simPaymentId = `pay_sim_${Date.now()}`;
 
@@ -350,99 +270,30 @@ export default function StepPayment({
           4. Payment & Authorization
         </h3>
         <p className="text-xs text-stone-500 mt-1">
-          Select your preferred payment channel. All transactions are 256-bit SSL encrypted.
+          Razorpay Secure Checkout. All transactions are 256-bit SSL encrypted.
         </p>
       </div>
 
-      {/* Payment Options Grid */}
+      {/* Single Razorpay Payment Option */}
       <div className="space-y-3">
-        {/* Option 1: Razorpay */}
-        <label
-          onClick={() => setSelectedMethod('RAZORPAY')}
-          className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-            selectedMethod === 'RAZORPAY'
-              ? 'border-[#C6A15B] bg-[#FAF6F0] ring-2 ring-[#C6A15B]/30'
-              : 'border-[#E3DCCF] bg-white hover:border-[#BDCFB1]'
-          }`}
-        >
-          <input
-            type="radio"
-            name="paymentMethod"
-            checked={selectedMethod === 'RAZORPAY'}
-            onChange={() => setSelectedMethod('RAZORPAY')}
-            className="mt-1 text-[#826530] focus:ring-[#C6A15B]"
-          />
+        <div className="flex items-start gap-4 p-5 rounded-2xl border border-[#C6A15B] bg-[#FAF6F0] ring-2 ring-[#C6A15B]/30 shadow-sm">
+          <div className="p-2 rounded-xl bg-[#E6EFE2] text-[#43513B]">
+            <ShieldCheck className="w-5 h-5 text-[#826530]" />
+          </div>
           <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm text-[#2A3425]">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="font-bold text-sm text-[#2A3425]">
                 Razorpay (UPI, Google Pay, PhonePe, Cards, NetBanking)
               </span>
-              <span className="bg-[#E6EFE2] text-[#43513B] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                Recommended
+              <span className="bg-[#5E7052] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Official Gateway
               </span>
             </div>
-            <p className="text-xs text-stone-500 mt-1">
-              Direct checkout via Razorpay Gateway with instant verification and Silk Mark authentication.
+            <p className="text-xs text-stone-600 mt-1 leading-relaxed">
+              Instant checkout via Razorpay Gateway supporting UPI apps, Google Pay, PhonePe, Debit/Credit Cards, and NetBanking with Silk Mark authenticity.
             </p>
           </div>
-        </label>
-
-        {/* Option 2: Demo Quick Authorization */}
-        <label
-          onClick={() => setSelectedMethod('DEMO_INSTANT')}
-          className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-            selectedMethod === 'DEMO_INSTANT'
-              ? 'border-[#C6A15B] bg-[#FAF6F0] ring-2 ring-[#C6A15B]/30'
-              : 'border-[#E3DCCF] bg-white hover:border-[#BDCFB1]'
-          }`}
-        >
-          <input
-            type="radio"
-            name="paymentMethod"
-            checked={selectedMethod === 'DEMO_INSTANT'}
-            onChange={() => setSelectedMethod('DEMO_INSTANT')}
-            className="mt-1 text-[#826530] focus:ring-[#C6A15B]"
-          />
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm text-[#2A3425]">
-                Instant Simulated Payment (1-Click Test Mode)
-              </span>
-              <span className="bg-[#FAF6EE] text-[#826530] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#DBBD83]">
-                Zero-Hassle Demo
-              </span>
-            </div>
-            <p className="text-xs text-stone-500 mt-1">
-              Instantly simulates successful payment and confirms the order with an `ALC-2026-XXXXXX` reference.
-            </p>
-          </div>
-        </label>
-
-        {/* Option 3: COD */}
-        <label
-          onClick={() => setSelectedMethod('COD')}
-          className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-            selectedMethod === 'COD'
-              ? 'border-[#C6A15B] bg-[#FAF6F0] ring-2 ring-[#C6A15B]/30'
-              : 'border-[#E3DCCF] bg-white hover:border-[#BDCFB1]'
-          }`}
-        >
-          <input
-            type="radio"
-            name="paymentMethod"
-            checked={selectedMethod === 'COD'}
-            onChange={() => setSelectedMethod('COD')}
-            className="mt-1 text-[#826530] focus:ring-[#C6A15B]"
-          />
-          <div className="flex-1">
-            <span className="font-semibold text-sm text-[#2A3425]">
-              Cash on Delivery (COD)
-            </span>
-            <p className="text-xs text-stone-500 mt-1">
-              Pay upon insured hand-delivery at your doorstep. Verified via mobile OTP.
-            </p>
-          </div>
-        </label>
+        </div>
       </div>
 
       {/* Security note */}
