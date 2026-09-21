@@ -1,7 +1,7 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_ALANKRITI2026';
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_ALANKRITI2026';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'ALANKRITI_SECRET_KEY_2026';
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'ALANKRITI_WEBHOOK_SECRET_2026';
 
