@@ -23,7 +23,7 @@ export interface ProductCardProps {
   isFeatured?: boolean;
 }
 
-export default function ProductCard({
+function ProductCardComponent({
   id,
   name,
   slug,
@@ -97,7 +97,7 @@ export default function ProductCard({
           src={imageUrl}
           alt={name}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
@@ -198,3 +198,5 @@ export default function ProductCard({
     </div>
   );
 }
+
+export default React.memo(ProductCardComponent);

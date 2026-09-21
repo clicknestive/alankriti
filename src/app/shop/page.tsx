@@ -43,6 +43,15 @@ function ShopContent() {
     setIsWishlistTab(searchParams.get('tab') === 'wishlist');
   }, [searchParams]);
 
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   useEffect(() => {
     if (isWishlistTab) {
       setIsLoading(false);
@@ -54,7 +63,7 @@ function ShopContent() {
     if (selectedCategory) params.set('category', selectedCategory);
     if (selectedPriceRange) params.set('priceRange', selectedPriceRange);
     if (selectedColour) params.set('colour', selectedColour);
-    if (searchQuery) params.set('q', searchQuery);
+    if (debouncedQuery) params.set('q', debouncedQuery);
     if (sortBy) params.set('sortBy', sortBy);
 
     fetch(`/api/products?${params.toString()}`)
@@ -68,7 +77,7 @@ function ShopContent() {
     selectedCategory,
     selectedPriceRange,
     selectedColour,
-    searchQuery,
+    debouncedQuery,
     sortBy,
     isWishlistTab,
   ]);
